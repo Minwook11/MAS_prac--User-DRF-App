@@ -11,9 +11,9 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
-import os
+import os, json
 
-import setting_secrets.py
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,7 +23,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = setting_secrets.SECRET_KEY
+secret_file = os.path.join(BASE_DIR, 'secrets_App.json')
+
+with open(secret_file) as fp:
+	secrets = json.loads(fp.read())
+
+def get_secret(target, secrets = secrets):
+	try:
+		return secrets[target]
+	except KeyError:
+		msg = 'Error occured during {} value reading'.format(target)
+		raise ImproperlyConfigured(msg)
+
+SECRET_KEY = get_secret("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -41,6 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 	'corsheaders',
+	'rest_framework',
 ]
 
 MIDDLEWARE = [
