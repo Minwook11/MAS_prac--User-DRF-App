@@ -1,32 +1,24 @@
 from rest_framework import serializers
-from .models import Account, Password, DeliveryAddress, SigninInformation, AddressBook
+from .models import Account, SigninInfo
 
 class AccountSerializer(serializers.Serializer):
 	account = serializers.CharField()
-	name = serializers.CharField()
-	age = serializers.IntegerField()
-	job = serializers.CharField()
+	name    = serializers.CharField()
+	age     = serializers.IntegerField()
+	job     = serializers.CharField()
 	address = serializers.CharField()
 
 	def create(self, validated_data):
 		account, flag = Account.objects.get_or_create(**validated_data)
 		return account
 
-class PasswordSerializer(serializers.Serializer):
+class SigninInfoSerializer(serializers.Serializer):
+	account  = AccountSerializer()
 	password = serializers.CharField()
 
 	def create(self, validated_data):
-		password, flag = Password.objects.get_or_create(**validated_data)
-		return password
+		account_data  = validated_data.pop('account')
+		account, flag = Account.objects.get_or_create(**account_data)
 
-class WriteSigninInformationSerializer(serializers.Serializer):
-	user = AccountSerializer()
-	password = PasswordSerializer()
-
-	def create(self, validated_data):
-		user_data = validated_data.pop('user')
-		user, flag = Account.objects.get_or_create(**user_data)
-		password, flag = Password.objects.get_or_create(password = validated_data['password']['password'])
-
-		signininform, flag = SigninInformation.objects.get_or_create(user = user, password = password)
-		return signininform
+		signininfo, flag = SigninInfo.objects.get_or_create(account = account, **validated_data)
+		return signininfo
