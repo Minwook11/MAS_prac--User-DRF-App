@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from .serializer import AccountSerializer,SigninInfoSerializer
 from .models import Account
 
+# 계정명 중복 확인 API
 @api_view(['GET'])
 def accountDuplicate(request):
 	if request.method == 'GET':
@@ -19,6 +20,7 @@ def accountDuplicate(request):
 					data   = {"detail" : "Available account"}, 
 					status = status.HTTP_200_OK)
 
+# 회원가입 API
 @api_view(['POST'])
 def signUp(request):
 	if request.method == 'POST':
